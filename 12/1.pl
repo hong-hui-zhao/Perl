@@ -1,16 +1,27 @@
 #!/usr/bin/perl
 
-$DNA = "ATCGAAAGCTTTCGGAATTCATCGAAGCTTATCGGGAATTCATCGACTGGACTATTCATCGATAAGCTTCGGGAATTCCA";
+use 5.010;
+$dna = "ATCGAAAGCTTTCGGAATTCATCGAAGCTTATCGGGAATTCATCGACTGGACTATTCATCGATAAGCTTCGGGAATTCCA";
 $ECORI = "GAATTC";
-$HIND3 = "AAGCTT"; 
-$C_ECORI = "GmEmAATTC";
-$C_HIND3 = "AmHmAGCTT";
-$DNA =~s/$ECORI/$C_ECORI/g;
-$DNA =~s/$HIND3/$C_HIND3/g;
-@dna_cut = split/m/,$DNA;
-foreach $i(@dna_cut){
-	$num = length($i);
-	if($num == 1) {print $i," ";}
-	else {print "$num ";}}
+
+while (1) {
+    if ($dna =~/$ECORI/) {
+        push @dna_cut,$`.'G';
+        $dna = 'AATCC'.$';
+    } else {
+        push @dna_cut,$dna;
+        last;
+    }
+}
+
+$count = @dna_cut - 1;
+print "Cut sites: $count\nsegment\tlength\tsequence\n";
+map {print ++$segment, "\t", length($_), "\t$_\n";} @dna_cut;
 
 
+$dna = "ATCGAAAGCTTTCGGAATTCATCGAAGCTTATCGGGAATTCATCGACTGGACTATTCATCGATAAGCTTCGGGAATTCCA";
+@dna_cut = $dna =~ /\w*?G(?=AATTC)/g; #将酶切后的所有前片段存入@dna_cut
+push @dna_cut, $dna =~ /\w*G\KAATTC\w*/g; #将酶切后的最后的片段存入@dna_cut
+$count = @dna_cut - 1;
+print "Cut sites: $count\nsegment\tlength\tsequence\n";
+map {print ++$segment, "\t", length($_), "\t$_\n";} @dna_cut;
