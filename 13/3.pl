@@ -1,32 +1,66 @@
 #!/usr/bin/perl
-use 5.010;
-use strict;
-use warnings;
-use utf8;
-#引入utf8模块 脚本内的字符串使用utf8作为编码格式
-binmode(STDOUT,":encoding(gbk)");
-# 定义汽泡排序函数
-sub SORT {
-    my @array = @_;        # 接收数组作为输入
-    my $length = scalar @array;    # 获取数组的长度
 
-    # 执行汽泡排序
-    for my $i (0..$length-2) {    # 从第一个元素到倒数第二个元素
-        for my $j (0..$length-$i-2) {    # 从第一个元素到(length - i - 2)元素
-            if ($array[$j] > $array[$j+1]) {    # 比较相邻的元素
-                # 如果顺序不正确，则交换元素
-                ($array[$j], $array[$j+1]) = ($array[$j+1], $array[$j]);
-            }
+sub translation {
+    my ($dna, $strand, $frame) = @_;
+    my $protein = "";
+
+    if ($strand eq 's') {
+        my $subdna = substr($dna, $frame-1);
+        for (my $i = 0; $i < (length($subdna) - 2); $i += 3) {
+            my $codon = substr($subdna, $i, 3);
+            $protein .= translate_codon($codon);
+        }
+    } elsif ($strand eq 'a') {
+        my $rc_dna = reverse($dna);
+        $rc_dna =~ tr/ATCG/TAGC/;
+        my $subdna = substr($rc_dna, $frame-1);
+        for (my $i = 0; $i < (length($subdna) - 2); $i += 3) {
+            my $codon = substr($subdna, $i, 3);
+            $protein .= translate_codon($codon);
         }
     }
 
-    return @array;    # 返回排序后的数组
+    return $protein;
 }
 
-# 测试SORT函数
-my @unsorted = (9, 5, 2, 7, 1);    # 创建一个未排序的数组
-my @sorted = SORT(@unsorted);    # 调用SORT函数对数组进行排序
+sub translate_codon {
+    my $codon = shift;
 
-# 打印未排序和排序后的数组
-print "未排序的数组: @unsorted\n";
-print "排序后的数组: @sorted\n";
+    if ($codon =~ /GC./) { return 'a' }
+    elsif ($codon =~ /TG[TC]/) { return 'c' }
+    elsif ($codon =~ /GA[TC]/) { return 'd' }
+    elsif ($codon =~ /GA[AG]/) { return 'e' }
+    elsif ($codon =~ /TT[TC]/) { return 'f' }
+    elsif ($codon =~ /GG./) { return 'g' }
+    elsif ($codon =~ /CA[TC]/) { return 'h' }
+    elsif ($codon =~ /AT[TCA]/) { return 'i' }
+    elsif ($codon =~ /AA[AG]/) { return 'k' }
+    elsif ($codon =~ /TT[AG]CT./) { return 'l' }
+    elsif ($codon =~ /ATG/) { return 'm' }
+    elsif ($codon =~ /AA[TC]/) { return 'n' }
+    elsif ($codon =~ /CC./) { return 'p' }
+    elsif ($codon =~ /CA[AG]/) { return 'q' }
+    elsif ($codon =~ /CG.|AG[AG]/) { return 'r' }
+    elsif ($codon =~ /TC.|AG[TC]/) { return 's' }
+    elsif ($codon =~ /AC./) { return 't' }
+    elsif ($codon =~ /GT./) { return 'v' }
+    elsif ($codon =~ /TGG/) { return 'w' }
+    elsif ($codon =~ /TA[TC]/) { return 'y' }
+    elsif ($codon =~ /TA[AG]TGA/) { return '*' }
+    else { return '#' }
+}
+
+print "Enter the DNA sequence: ";
+my $dna = <STDIN>;
+chomp $dna;
+
+print "Enter the strand type (s for sense, a for antisense): ";
+my $strand = <STDIN>;
+chomp $strand;
+
+print "Enter the frame value (1, 2, or 3): ";
+my $frame = <STDIN>;
+chomp $frame;
+
+my $translation_result = translation($dna, $strand, $frame);
+print "Translation result: $translation_result\n";
