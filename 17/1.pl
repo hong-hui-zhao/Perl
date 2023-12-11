@@ -1,29 +1,39 @@
 #!/usr/bin/perl
 
-open(DNA, ">", "dna.fasta") or die;
-@base = qw(A T C G);
-foreach $i (1..3) {
-    $DNA = "";
-    foreach (1..500) {
-        $DNA .= $base[rand @base];
+use 5.010;
+use utf8;
+binmode(STDOUT, ":encoding(gbk)");
+mkdir "test" if!-e "test";
+mkdir "test/test1" if!-e "test/test1";
+for my $i (1..5) {
+    open FH, ">", "./test/st$i.txt" or die;
+    open FH, ">", "./test/te$i.fasta" or die;
+}
+close FH;
+@files = glob("./test/*");
+print "在当前目录下用 glob 获取 test 目录下全部文件:\n";
+print "$_\n" for @files;
+chdir "test";
+mkdir "test1" or print "test1 已存在。\n";
+@files = glob("*txt");
+print "在 test 目录下用 glob 获取当前目录下 *txt 文件:\n";
+print "$_\n" for @files;
+chdir "..";
+print "在 test 父目录下用 opendir 和 readdir 取 test 目录下所有文件:\n";
+opendir DIR, "test";
+@files = readdir DIR;
+closedir DIR;
+chdir "test";
+print "在 test 目录下判断获取的文件名是文件还是目录:\n";
+for (@files) {
+    if (-d $_) {
+        print "文件夹: $_\n";
     }
-    print DNA ">ID:number $i\n";
-    for ($j = 0; $j < 500; $j += 70) {
-        print DNA substr($DNA, $j, 70), "\n";
+    else {
+        print "文件: $_\n";
     }
 }
-close DNA;
-open(DNA, "<", "dna.fasta") or die;
-while (my $line = <DNA>) {
-    chomp $line;
-    if ($line =~ /^>/) {
-        push @newdna, $line;
-        $first = 1;
-    } elsif ($first == 1) {
-        push @newdna, $line;
-        $first = 0;
-    } else {
-        $newdna[-1] .= $line;
-    }
-}
-map { print $_, "\n" } @newdna;
+
+rmdir "test1" or print "$!";unlink @files;
+chdir "..";
+rmdir "test" or print "$!";

@@ -1,33 +1,51 @@
 #!/usr/bin/perl
+use strict;
+use warnings;
+use utf8;
+binmode(STDOUT, ":encoding(gbk)");
 
-# 定义文件名
-my $filename = "11.txt";
+my @A = (3, 6, 8, 9, 10);
+my @B = (1, 2, 3, 4, 5);
+# 用于存储结果的数组
+my @result;
 
-# 打开文件句柄，以只读方式打开文件，如果无法打开则报错并退出程序
-open(my $fh, "<", $filename) or die "Cannot open file '$filename': $!";
-
-# 定义一个子程序，用于计算平均值
-sub calculate_average {
-    my @scores = @_;  # 接收传入的参数，即成绩数组
-    my $sum = 0;  # 初始化总和为0
-    foreach my $score (@scores) {  # 遍历成绩数组
-        $sum += $score;  # 将每个成绩累加到总和中
+# 遍历数组 A 的每个元素
+foreach my $element_A (@A) {
+    foreach my $element_B1 (@B) {
+        foreach my $element_B2 (@B) {
+            # 如果 B 数组中两个元素不相等且它们的和等于数组 A 的元素
+            if ($element_B1 != $element_B2 && $element_A == $element_B1 + $element_B2) {
+                # 如果结果数组中已经包含该元素，则跳过
+                if ( grep { $_ == $element_A } @result) {next;} 
+                # 将该元素添加到结果数组中
+                push @result, $element_A;
+            }
+        }
     }
-    my $average = $sum / scalar(@scores);  # 计算平均值
-    return $average;  # 返回平均值
 }
 
-# 定义一个哈希表，用于存储每位同学的成绩
-my %scores;
+# 打印结果数组
+print "方法一的结果：@result\n";
 
-# 逐行读取文件内容
-while (my $line = <$fh>) {
-    chomp $line;  # 去除行尾的换行符
-    my ($name, @course_scores) = split /\s+/, $line;  # 将每行内容按空白字符分割为姓名和课程成绩数组
-    $scores{$name} = \@course_scores;  # 将姓名和对应的课程成绩数组存储到哈希表中
-    my $average = calculate_average(@course_scores);  # 调用子程序计算课程平均成绩
-    print "$line Average: $average\n";  # 打印每行内容和对应的平均成绩
+# 用于存储 B 数组中所有两数之和的哈希表
+my %sums;
+
+# 遍历数组 B 的每一对元素，并将其和存储到哈希表中
+foreach my $num_B1 (@B) {
+    foreach my $num_B2 (@B) {
+        # 跳过相同的元素
+        next if $num_B1 == $num_B2;
+        $sums{$num_B1 + $num_B2} = 1;
+    }
 }
 
-# 关闭文件句柄
-close $fh;
+# 用于存储结果的数组
+my @results;
+
+# 遍历数组 A 的每个元素，如果在哈希表中找到相应的元素，则添加到结果数组中
+foreach my $num_A (@A) {
+    push @results, $num_A if exists $sums{$num_A};
+}
+
+# 打印结果数组
+print "方法二的结果：@results\n";
