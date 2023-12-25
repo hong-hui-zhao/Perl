@@ -1,26 +1,33 @@
 #!/usr/bin/perl
-use 5.010;
-use utf8;
-binmode(STDOUT, ":encoding(gbk)");@array =(
-    [1,2,3],
-    [4,5,6],
-    [7,8,9]
+use strict;
+use warnings;
+
+my @A = (
+    [1, 2, 3],
+    [4, 5, 6]
 );
 
-print "-" x 18,"\n";
-print "原始矩阵：\n";
-# 使用map和join将原始矩阵的每一行转换为字符串并打印出来，元素之间用制表符分隔
-print map {join("\t",@$_)."\n"} @array;
-print "-" x 18,"\n";
-print "转置后的矩阵：\n";
+my @B = (
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+);
 
-for $i(0..$#array){
-    for $j(0..$#{$array[$i]}){
-        $r_array[$j][$i] = $array[$i][$j];
-        # 计算原始矩阵的转置，将结果保存在$r_array数组中
+if (@{$A[0]} != @{$B[0]}) {
+    # 如果两数组行列不等，报告
+    print "Can not multiply!\n";
+} else {
+    my @C;
+
+    for my $i (0..$#A) {
+        for my $j (0..$#{$B[0]}) {
+            # 次循环，$j，遍历第2个数组
+            for my $q (0..$#B) {
+                # 内循环，$q，为第 1 个数组的
+                $C[$i][$j] += $A[$i][$q] * $B[$q][$j];
+            }
+        }
     }
-}
-# 使用map和join将转置后的矩阵的每一行转换为字符串并打印出来，元素之间用制表符分隔
-print map {join ("\t", @$_)."\n"} @r_array;
-print "-" x 18,"\n";
 
+    print map { join("\t", @$_) . "\n" } @C; # map 遍历 @C，其内
+}

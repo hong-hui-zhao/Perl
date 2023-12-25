@@ -1,34 +1,34 @@
 #!/usr/bin/perl
 use strict;
 use warnings;
-use utf8;
-binmode(STDOUT, ":encoding(gbk)");
-# 定义函数，使用引用传递参数
-sub find_max {
-    my ($array_ref) = @_;
+use encoding 'utf8', STDOUT => 'gb2312';
+use 5.010;
 
-    # 检查是否传递了有效的数组引用
-    unless (ref $array_ref eq 'ARRAY') {
-        die "Invalid array reference provided.";
-    }
+# 定义一个二维数组
+my @original_array = (
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 9]
+);
 
-    # 初始化最大值为数组的第一个元素
-    my $max_value = $array_ref->[0];
+# 将二维数组写入文件
+my $file_name = "array_data.txt";
+open(my $file, '>', $file_name) or die "无法打开文件：$!";
 
-    # 遍历数组，找到最大值
-    foreach my $element (@$array_ref) {
-        if ($element > $max_value) {
-            $max_value = $element;
-        }
-    }
+# 使用 map 和 join 写入文件，每一行是一个匿名数组引用
+say $file join(',', @$_) for @original_array;
 
-    return $max_value;
-}
+close $file;
 
-# 主程序
-my @input_array = (3, 7, 1, 9, 5);
+# 从文件中读取数据并存入新的二维数组
+my @new_array;
+open($file, '<', $file_name) or die "无法打开文件：$!";
 
-# 调用函数并打印结果
-my $result = find_max(\@input_array);
-print "最大值是: $result\n";
+# 使用 map 和 split 读取文件数据，每一行都被解析成一个匿名数组引用
+push @new_array, [split /,/] while (<$file>);
 
+close $file;
+
+# 输出新的二维数组
+say "从文件中读取的数组：";
+say join("\t", @$_) for @new_array;

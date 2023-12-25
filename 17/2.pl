@@ -1,38 +1,68 @@
 #!/usr/bin/perl
 
-use strict;
-use warnings;
+use 5.010;
 use utf8;
 binmode(STDOUT, ":encoding(gbk)");
-# 定义函数 Axb，接受两个数组引用作为参数，返回所有元素两两相乘的结果数组的引用
-sub Axb {
-    my ($array1_ref, $array2_ref) = @_;
 
-    my @result;
+# 输入矩阵
+my @matrix;
+print "请输入矩阵，每行元素以空格分隔，行之间用回车分隔。输入完毕后，请在新的一行输入结束标记（例如'end'）:\n";
 
-    # 逐个元素两两相乘并存储结果
-    for my $i (@$array1_ref) {
-        for my $j (@$array2_ref) {
-            push @result, $i * $j;
+while (my $line = <STDIN>) {
+    chomp($line);
+    
+    last if $line =~ /^\s*end\s*$/i; # 结束标记，不区分大小写
+
+    my @row = split /\s+/, $line;
+    push @matrix, \@row;
+}
+
+# 输出转置前的矩阵
+print "原始矩阵:\n";
+print_matrix(\@matrix);
+
+# 进行矩阵转置
+my $transposed_matrix = transpose_matrix(\@matrix);
+
+# 输出转置后的矩阵
+print "转置后的矩阵:\n";
+print_matrix($transposed_matrix);
+
+# 匿名引用：打印矩阵
+my $print_matrix = sub {
+    my $matrix_ref = shift;
+
+    for my $row (@$matrix_ref) {
+        for my $element (@$row) {
+            print "$element\t";
+        }
+        print "\n";
+    }
+};
+
+# 匿名引用：矩阵转置
+my $transpose_matrix = sub {
+    my $matrix_ref = shift;
+
+    my $num_rows = scalar(@$matrix_ref);
+    my $num_cols = scalar(@{$matrix_ref->[0]});
+
+    my @transposed_matrix;
+
+    for my $i (0 .. $num_rows - 1) {
+        for my $j (0 .. $num_cols - 1) {
+            $transposed_matrix[$j][$i] = $matrix_ref->[$i][$j];
         }
     }
 
-    return \@result;
-}
+    return \@transposed_matrix;
+};
 
-# 主程序
-print "第一个数组: ";
-my $input1 = <STDIN>;
-chomp $input1;
-my @array1 = split ' ', $input1;
+# 使用匿名引用打印矩阵
+$print_matrix->(\@matrix);
 
-print "第二个数组: ";
-my $input2 = <STDIN>;
-chomp $input2;
-my @array2 = split ' ', $input2;
+# 使用匿名引用进行矩阵转置
+$transposed_matrix = $transpose_matrix->(\@matrix);
 
-# 调用 Axb 函数计算两个数组元素的乘积
-my $result_ref = Axb(\@array1, \@array2);
-
-# 输出结果
-print "结果: ", join(' ', @$result_ref), "\n";
+# 使用匿名引用打印转置后的矩阵
+$print_matrix->($transposed_matrix);

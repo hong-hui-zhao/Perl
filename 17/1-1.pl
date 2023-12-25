@@ -1,18 +1,24 @@
 #!/usr/bin/perl
 
-
+use 5.010;
 use utf8;
 binmode(STDOUT, ":encoding(gbk)");
+# 示例代码7-9：匿名变量引用的创建和ref函数
+@refs = (
+    \"张三",
+    ["张三", "李四"],
+    {"ID1" => "张三", "ID2" => "李四"}
+);
 
-@class1 = qw(张三 李四 王五);
-@class2 = qw(Tom John Lily);
-@class3 = qw(Tom 张 John 王 Lily 李);
-@grade1 = qw(class1 class2 class3);
-
-foreach $i (0..2) {
-    print "class", $i + 1, ": ";
-    foreach $j (0..$#{$grade1[$i]}) {
-        print $grade1[$i][$j], "\t";
+# 匿名哈希引用
+foreach $i (@refs) {
+    $ref = ref($i);
+    if ($ref eq "SCALAR") {
+        print "标量值: $$i\n";  # 用$解引用
+    } elsif ($ref eq "ARRAY") {
+        # 数组引用
+        print "数组值：@$i\n";
+    } elsif ($ref eq "HASH") {
+        print "哈希值为：", %$i, "\n";
     }
-    print "\n";
 }
